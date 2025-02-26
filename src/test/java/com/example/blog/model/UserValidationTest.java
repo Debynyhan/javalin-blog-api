@@ -5,12 +5,13 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import com.example.blog.model.User;
+
 
 import java.util.Set;
 import jakarta.validation.ConstraintViolation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UserValidationTest {
 
@@ -29,26 +30,35 @@ public class UserValidationTest {
         assertEquals(0, violations.size());
     }
 
-    @Test
+        @Test
     public void whenUsernameIsMissing_thenValidationFails() {
-        User user = new User("", "validpass", "valid@email.com", "user");
-        user.setId("123");
-
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-
-        assertEquals(1, violations.size());
-        assertEquals("Username is required", violations.iterator().next().getMessage());
-    }
-
-    @Test
-    public void whenEmailIsInvalid_thenValidationFails() {
-        User user = new User("validuser", "validpass", "invalid-email", "user");
+        User user = new User("", "validPassword123", "valid@email.com", "user");
         user.setId("123");
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
         assertEquals(2, violations.size());
-        assertEquals("Email should be valid", violations.iterator().next().getMessage());
+        boolean hasUsernameViolation = violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("username") &&
+                        (v.getMessage().equals("Username is required") ||
+                                v.getMessage().equals("Username must be between 3 and 20 characters")));
+        assertTrue(hasUsernameViolation, "Expected a violation on username for being blank or too short");
+    }
+
+
+    @Test
+    public void whenEmailIsInvalid_thenValidationFails() {
+        User user = new User("validUser", "validPassword123", "invalid-email", "user");
+        user.setId("123");
+
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+
+        assertEquals(1, violations.size());
+
+        boolean hasEmailViolation = violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("email") &&
+                        v.getMessage().equals("Email should be valid"));
+        assertTrue(hasEmailViolation, "Expected a violation on email for being invalid");
     }
 
 }
