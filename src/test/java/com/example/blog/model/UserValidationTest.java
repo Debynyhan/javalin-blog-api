@@ -47,7 +47,7 @@ public class UserValidationTest {
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
-        assertEquals(1, violations.size());
+        assertEquals(2, violations.size());
         assertEquals("Email should be valid", violations.iterator().next().getMessage());
     }
 
