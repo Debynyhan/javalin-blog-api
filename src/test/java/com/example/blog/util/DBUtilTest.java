@@ -1,40 +1,48 @@
 package com.example.blog.util;
 
+
+import com.example.blog.util.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DBUtilTest {
+/**
+ * Test class for DBUtil.
+ * Assumes a test environment is configured and reachable.
+ */
+class DBUtilTest {
+
+    private Connection connection;
+
+    @BeforeEach
+    void setUp() throws SQLException {
+        // Acquire a connection before each test
+        connection = DBUtil.getConnection();
+    }
+
+
+
 
     @Test
-    public void getConnection_shouldReturnValidConnection() throws SQLException {
-        Connection connection = null;
-        try {
-            connection = DBUtil.getConnection();
-            assertNotNull(connection);
-            assertFalse(connection.isClosed());
+    public void executeQuery_validQuery_shouldReturnResultSet() {
+        String query = "SELECT 1 AS test"; // Simple query to test connection
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            assertTrue(resultSet.next(), "Result set should have at least one row");
+            assertEquals(1, resultSet.getInt("test"), "Expected value should be 1");
         } catch (SQLException e) {
-            fail("Exception during connection: " + e.getMessage());
-        } finally {
-            if (connection != null) {
-                connection.close();
-            }
+            fail("Failed to execute query: " + e.getMessage());
         }
     }
 
-    @Test
-        public void getConnection_shouldThrowSQLExceptionWhenDriverNotFound() {
-            // Simulate driver not found
-            assertThrows(SQLException.class, () -> {
-                Connection connection = null;
-                // Simulate driver not found by removing the H2 driver from the classpath
-                 Class.forName("com.nonexistent.Driver"); // Use nonexistent class
-                connection = DBUtil.getConnection();
 
-
-            });
-        }
+  
 }
