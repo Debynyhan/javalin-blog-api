@@ -5,7 +5,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.Objects;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
 
     @NotBlank(message = "Username is required")
